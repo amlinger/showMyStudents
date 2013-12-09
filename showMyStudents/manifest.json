@@ -1,0 +1,82 @@
+{
+	
+	"manifest_version"	: 2,
+
+	"name"				: "Show My Students",
+	"description"		: "A tool for filtrating students based on their group belongings in 
+						   LiU:s webbased Lisam system. Built expecially for the administrative 
+						   personalle and teachers course 725G61.",
+	"version"			: "1.0",
+
+	/*
+	 * The default setting for the extension is the off mode. 
+	 * Therefore, the off logo/icons is the default and the
+	 * startup icon. 
+	 */
+	"page_action"	: {
+		"default_icon" 	: {
+			"19"		: "images/icon19_off.png",
+			"38"		: "images/icon38.png"
+		}
+	},
+	
+	/*
+	 * Restricts the permission to a bare minimum of a
+	 * subpage of WebReg, as well Lisam subpages for the
+	 * course.
+	 */
+	"permissions"		: [
+		"storage",
+		"tabs",
+		"https://studentsubmissions.app.cloud.it.liu.se/",
+		"https://www.ida.liu.se/webreg/725G61-2013/*"
+	],
+
+	/*
+	 * Scripts running in the background - controlling the 
+	 * appearrance as well as the functionality controlling
+	 * the onclick function for the icon button.
+	 */
+	"background"		: {
+		"scripts"		: [
+			"src/js/globals.js",
+			"src/js/background.js"
+		]
+	},
+
+	"content_scripts"	: [
+		/*
+		 * Filter scripts for the Lisam part of the course
+		 * pages.
+		 */
+		{
+			"matches"	: [
+				"https://studentsubmissions.app.cloud.it.liu.se/"
+			],
+			
+			"js"		: [
+				"src/js/globals.js",
+				"myStudents.js",
+				"src/js/lib/jquery.js",
+				"src/js/filter.js"
+			]
+		},
+
+		/*
+		 * Fetchting scripts for the WebReg part of the course
+		 * pages.
+		 */
+		{
+			"matches"	: [
+				"https://www.ida.liu.se/webreg/725G61-2013/*/results"
+			],
+			
+			"js"		: [
+				"src/js/globals.js",
+				"myStudents.js",
+				"src/js/lib/jquery.js",
+				"src/js/fetchStudents.js"
+			]
+		}
+	]
+}
