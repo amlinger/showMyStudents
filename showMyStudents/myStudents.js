@@ -13,6 +13,8 @@ var myStudents = [
 	// etc.
 ];
 
+var groupStudents = true;
+
 /*
  * The following list contains the students fetched 
  * from WebReg, and is assumed to not be updated in

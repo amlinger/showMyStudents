@@ -1,8 +1,3 @@
-
-
-
-
-
 var members = new Array();
 
 $(document).ready(function() {
@@ -43,12 +38,10 @@ $(document).ready(function() {
 		 * for-loop for faster iteration.
 		 */
 		for(var i=0,len=studentArray.length; i<len; i++) {
-			var set = studentArray[i];
-			
-			for(var j=0; set[j] !== undefined; j++) {
-				members.push(set[j]);
-				members.push(set[j] + "@student.liu.se");
-			}
+			members.push({
+				approved : false, // Assuming false;
+				students : studentArray[i]
+			});
 		}
 
 		return true;
@@ -60,33 +53,103 @@ $(document).ready(function() {
 		
 		if(iterable.length === 0) return false;
 
+		$.each(
+			iterable, 
+			function(index, item) {
+
+				if(active) {
+
+					var email 		= $(item).find("td:nth-child(6)").text();
+					var approved	= $(item).find("td:nth-child(9)").text();
+					var isIn 		= false;
+
+					for(var i=0, len=members.length; i<len; i++) {
+						if($.inArray(email, (members[i]).students) !== -1) {
+							
+							if(approved === 'Godkänd')
+								members[i].approved = true;
+
+							isIn = true;
+							break;
+						}
+					}
+
+					if(!isIn)
+						$(item).hide();
+
+				} else 
+					$(item).show();
+			}
+		);
+		fadeApprovedPairs();
+		return true;
+	}
+
+	function fadeApprovedPairs() {
+
+		var iterable = $("#viewDIV .table tr.ng-scope");
+		
+		if(iterable.length === 0) return false;
+
 
 		$.each(
 			iterable, 
 			function(index, item) {
+
+
 				if(active) {
 
-					var email =  $(item).find("td:nth-child(6)").text();
+					var isIn 	= false;
+					var email 	= $(item).find("td:nth-child(6)").text();
 
-					if($.inArray(email, members) === -1) {
-						$(item).hide();
+					for(var i=0, len=members.length; i<len; i++) {
+						if($.inArray(email, (members[i]).students) !== -1) {
+							var others = " (med";
+
+							for(var j=0, len=members[i].students.length; j<len; j++) {
+								var name = members[i].students[j];
+								if(name !== email)
+									others += " " + name;
+							}
+
+							others = others.trim(",");
+							others += ")";
+
+
+							if(members[i].approved) {
+								$(item).css({
+									opacity 		: ".3"
+								}).find("td:nth-child(9)").text("Godkänd " + others);
+							}
+							break;
+						}
 					}
-				} else {
-					$(item).show();
-				}
 
+				} else {
+					$(item).css({ 
+						opacity 		: "1",
+						backgroundColor : "#none"
+					});
+				}	
 			}
 		);
-
-		return true;
 	}
+
 	chrome.storage.local.get("ACTIVE", function(result) {
 		active = result["ACTIVE"];
 		intervalSearch();
 	});
 
 	function intervalSearch() {
+
+
 		var intervalID = setInterval(function() {
+
+			
+			//if($('h2.ng-binding').html().indexOf("Labb") === -1){
+			//	console.log("INGEN LABBSIDA!" + $('h2.ng-binding').text());
+			//}
+
 			if(!findMemberStudents(myStudents)) {
 				if(fetchedStudents === undefined) {
 					clearInterval(intervalID);
@@ -101,6 +164,10 @@ $(document).ready(function() {
 				if(filterStudents()) {
 					clearInterval(intervalID);
 				}
+				
+				//if(groupStudents) {
+					fadeApprovedPairs();
+				//}
 			}
 		}, 200);
 	}
